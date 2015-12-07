@@ -53,7 +53,8 @@ public class MainActivity extends AbstractActivity {
                 }
                 RestResponse r = twitterDAO.login(params[0], params[1]);
                 if (r.isError()) {
-                    displayToast(r.getBody());
+                    displayToast( new JSONObject(r.getBody()).getString("message"));
+                    return null;
                 }
 
                 return new JSONObject(r.getBody()).getString("access_token");

@@ -26,9 +26,14 @@ public class AbstractActivity extends AppCompatActivity {
      *
      * @param body the body
      */
-    void displayToast(String body) {
-        Looper.prepare();
-        Toast.makeText(this, body, Toast.LENGTH_LONG).show();
+    void displayToast(final String body) {
+        runOnUiThread(new Runnable() {
+            public void run() {
+
+                Toast.makeText(AbstractActivity.this, body, Toast.LENGTH_LONG).show();
+            }
+        });
+
     }
 
     /**
