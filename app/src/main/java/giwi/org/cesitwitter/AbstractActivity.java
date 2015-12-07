@@ -2,7 +2,9 @@ package giwi.org.cesitwitter;
 
 import android.app.ProgressDialog;
 import android.os.Looper;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.Toast;
 
 /**
@@ -25,11 +27,12 @@ public class AbstractActivity extends AppCompatActivity {
      * Display toast.
      *
      * @param body the body
+     * @param v    the v
      */
-    void displayToast(final String body) {
+    void displayToast(final String body, final View v) {
         runOnUiThread(new Runnable() {
             public void run() {
-                Toast.makeText(AbstractActivity.this, body, Toast.LENGTH_LONG).show();
+                Snackbar.make(v, body, Snackbar.LENGTH_LONG).show();
             }
         });
 
