@@ -34,7 +34,7 @@ import giwi.org.cesitwitter.model.Message;
 /**
  * The type Messages activity.
  */
-public class MessagesActivity extends AbstractActivity
+public class LoggedActivity extends AbstractActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     ListView listView;
     MessagesAdapter adapter;
@@ -152,7 +152,7 @@ public class MessagesActivity extends AbstractActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_messages) {
-            Intent i = new Intent(this, MessagesActivity.class);
+            Intent i = new Intent(this, LoggedActivity.class);
             i.putExtra(Constants.INTENT_TOKEN, token);
             startActivity(i);
         } else if (id == R.id.nav_logout) {
@@ -195,7 +195,7 @@ public class MessagesActivity extends AbstractActivity
                 }
                 RestResponse r = twitterDAO.getMessages(params[0]);
                 if (r.isError()) {
-                    displayToast(new JSONObject(r.getBody()).getString("message"), findViewById(R.id.layout));
+                    displayToast(new JSONObject(r.getBody()).getString("message"));
                     return null;
                 }
 
@@ -229,7 +229,6 @@ public class MessagesActivity extends AbstractActivity
                 }
                 Collections.reverse(msgs);
                 adapter.addMessage(msgs);
-                adapter.notifyDataSetChanged();
                 if(swipeRefreshLayout.isRefreshing()) {
                     swipeRefreshLayout.setRefreshing(false);
                 }

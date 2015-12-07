@@ -1,15 +1,17 @@
-package giwi.org.cesitwitter;
+package giwi.org.cesitwitter.fragments;
 
 import android.app.ProgressDialog;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.Fragment;
+
+import giwi.org.cesitwitter.R;
 
 /**
  * Created by xavier on 07/12/15.
  */
-public class AbstractActivity extends AppCompatActivity {
-
+public class AbstractFragment extends Fragment {
     ProgressDialog progressDialog;
+
 
     /**
      * Method to close progress dialog.
@@ -26,9 +28,9 @@ public class AbstractActivity extends AppCompatActivity {
      * @param body the body
      */
     void displayToast(final String body) {
-        runOnUiThread(new Runnable() {
+        getActivity().runOnUiThread(new Runnable() {
             public void run() {
-                Snackbar.make(findViewById(R.id.layout), body, Snackbar.LENGTH_LONG).show();
+                Snackbar.make(getActivity().findViewById(R.id.layout), body, Snackbar.LENGTH_LONG).show();
             }
         });
 
@@ -38,9 +40,21 @@ public class AbstractActivity extends AppCompatActivity {
      * Display progress dialog.
      */
     void displayProgressDialog() {
-        progressDialog = new ProgressDialog(this);
+        progressDialog = new ProgressDialog(getActivity());
         progressDialog.setTitle("Loading ...");
         progressDialog.setMessage("hello in progress ...");
         progressDialog.show();
+    }
+
+    /**
+     * The interface On fragment interaction listener.
+     */
+    public interface OnFragmentInteractionListener {
+        /**
+         * On fragment interaction.
+         *
+         * @param uri the uri
+         */
+        void onFragmentInteraction(String uri);
     }
 }

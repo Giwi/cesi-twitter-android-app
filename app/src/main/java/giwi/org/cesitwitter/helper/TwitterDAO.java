@@ -27,9 +27,6 @@ public class TwitterDAO {
      */
     public RestResponse login(String username, String password) {
         try {
-           // Map<String, String> headers = new HashMap<>();
-            // headers.put("Authorization", "Bearer "  + token);
-
             JSONObject request = new JSONObject();
             request.put("username", username);
             request.put("password", password);
@@ -56,4 +53,22 @@ public class TwitterDAO {
         }
     }
 
+    /**
+     * Register rest response.
+     *
+     * @param username the username
+     * @param password the password
+     * @return the rest response
+     */
+    public RestResponse register(String username, String password) {
+        try {
+            JSONObject request = new JSONObject();
+            request.put("username", username);
+            request.put("password", password);
+
+            return httpHelper.send(Methods.POST,URL+"/api/users", request, null);
+        } catch (Exception e) {
+            return httpHelper.handleException(e);
+        }
+    }
 }

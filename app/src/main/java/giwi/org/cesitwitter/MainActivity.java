@@ -1,27 +1,17 @@
 package giwi.org.cesitwitter;
 
-import android.content.Context;
-import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
+import android.support.v4.app.Fragment;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import giwi.org.cesitwitter.helper.HTTPHelper;
-import giwi.org.cesitwitter.helper.RestResponse;
-import giwi.org.cesitwitter.helper.TwitterDAO;
+import giwi.org.cesitwitter.fragments.AbstractFragment;
+import giwi.org.cesitwitter.fragments.LoginFragment;
+import giwi.org.cesitwitter.fragments.SignupFragment;
 
 /**
  * The type Main activity.
  */
-public class MainActivity extends AbstractActivity {
-    TwitterDAO twitterDAO = new TwitterDAO();
-    EditText login;
-    EditText password;
+public class MainActivity extends AbstractActivity implements AbstractFragment.OnFragmentInteractionListener {
+    private Fragment fragment;
 
     /**
      * On create.
@@ -32,73 +22,26 @@ public class MainActivity extends AbstractActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        login = (EditText) findViewById(R.id.input_login);
-        password = (EditText) findViewById(R.id.input_password);
-        findViewById(R.id.loginButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                displayProgressDialog();
-                new LoginAsyncTask(v.getContext()).execute(login.getText().toString(), password.getText().toString());
-            }
-        });
+        fragment = getSupportFragmentManager().findFragmentById(R.id.fragment);
     }
 
-
-    /**
-     * The type Login async task.
-     */
-    public class LoginAsyncTask extends AsyncTask<String, Void, String> {
-
-        Context context;
-
-        /**
-         * Instantiates a new Login async task.
-         *
-         * @param context the context
-         */
-        public LoginAsyncTask(final Context context) {
-            this.context = context;
+    @Override
+    public void onFragmentInteraction(String uri) {
+        if (fragment != null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .remove(fragment).commit();
         }
-
-        /**
-         * Do in background string.
-         *
-         * @param params the params
-         * @return the string
-         */
-        @Override
-        protected String doInBackground(String... params) {
-            try {
-
-                if (!HTTPHelper.isInternetAvailable(context)) {
-                    return "Internet not available";
-                }
-                RestResponse r = twitterDAO.login(params[0], params[1]);
-                if (r.isError()) {
-                    displayToast(new JSONObject(r.getBody()).getString("message"), findViewById(R.id.layout));
-                    return null;
-                }
-
-                return new JSONObject(r.getBody()).getString("token");
-            } catch (JSONException e) {
-                e.printStackTrace();
-                return null;
-            }
+        if ("login".equals(uri)) {
+            fragment = LoginFragment.newInstance();
+        } else if ("signup".equals(uri)) {
+            fragment = SignupFragment.newInstance();
         }
-
-        /**
-         * On post execute.
-         *
-         * @param token the token
-         */
-        @Override
-        protected void onPostExecute(final String token) {
-            hideProgressDialog();
-            if (token != null) {
-                Intent i = new Intent(context, MessagesActivity.class);
-                i.putExtra(Constants.INTENT_TOKEN, token);
-                startActivity(i);
-            }
+        if (fragment != null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment, fragment)
+                    .commit();
         }
     }
 
