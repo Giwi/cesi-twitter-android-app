@@ -52,6 +52,15 @@ public class TwitterDAO {
             return httpHelper.handleException(e);
         }
     }
+    public RestResponse getConnectedUser(String token) {
+        try {
+             Map<String, String> headers = new HashMap<>();
+             headers.put("Authorization", "Bearer "  + token);
+            return httpHelper.send(Methods.GET,URL+"/api/users/me/", headers);
+        } catch (Exception e) {
+            return httpHelper.handleException(e);
+        }
+    }
 
     /**
      * Register rest response.

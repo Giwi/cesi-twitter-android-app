@@ -30,4 +30,6 @@
     <string name="signup">Signup</string>
     <string name="login">Login</string>
     <string name="signupLabel">Join the community</string>
+    <string name="profile">Profile</string>
+    <string name="action_camera">Photo</string>
 </resources>

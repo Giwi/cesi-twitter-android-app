@@ -2,7 +2,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="giwi.org.cesitwitter.fragments.SignupFragment">
+    tools:context="giwi.org.cesitwitter.fragments.SignupFragment"
+    android:background="@color/material_white">
     <android.support.v7.widget.CardView
         android:id="@+id/view"
         android:layout_width="match_parent"
@@ -35,6 +36,7 @@
                     android:id="@+id/input_login"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:drawablePadding="16dp"
                     android:drawableLeft="@drawable/ic_account_circle_black_18dp"
                     android:drawableStart="@drawable/ic_account_circle_black_18dp"
                     android:hint="@string/hint_login" />
@@ -51,6 +53,7 @@
                     android:inputType="textPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:drawablePadding="16dp"
                     android:drawableLeft="@drawable/ic_lock_black_18dp"
                     android:drawableStart="@drawable/ic_lock_black_18dp"
                     android:hint="@string/hint_password" />

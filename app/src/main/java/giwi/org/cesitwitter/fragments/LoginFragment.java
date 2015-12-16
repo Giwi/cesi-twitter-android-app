@@ -15,8 +15,10 @@ import org.json.JSONObject;
 
 import giwi.org.cesitwitter.Constants;
 import giwi.org.cesitwitter.LoggedActivity;
+import giwi.org.cesitwitter.MainActivity;
 import giwi.org.cesitwitter.R;
 import giwi.org.cesitwitter.helper.HTTPHelper;
+import giwi.org.cesitwitter.helper.PreferenceHelper;
 import giwi.org.cesitwitter.helper.RestResponse;
 import giwi.org.cesitwitter.helper.TwitterDAO;
 
@@ -36,6 +38,9 @@ public class LoginFragment extends AbstractFragment {
     View v;
     private OnFragmentInteractionListener mListener;
 
+    /**
+     * Instantiates a new Login fragment.
+     */
     public LoginFragment() {
         // Required empty public constructor
     }
@@ -46,7 +51,7 @@ public class LoginFragment extends AbstractFragment {
      *
      * @return A new instance of fragment LoginFragment.
      */
-    // TODO: Rename and change types and number of parameters
+// TODO: Rename and change types and number of parameters
     public static LoginFragment newInstance() {
         LoginFragment fragment = new LoginFragment();
         Bundle args = new Bundle();
@@ -54,17 +59,31 @@ public class LoginFragment extends AbstractFragment {
         return fragment;
     }
 
+    /**
+     * On create.
+     *
+     * @param savedInstanceState the saved instance state
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
 
+    /**
+     * On create view view.
+     *
+     * @param inflater           the inflater
+     * @param container          the container
+     * @param savedInstanceState the saved instance state
+     * @return the view
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         v = inflater.inflate(R.layout.fragment_login, container, false);
         login = (EditText) v.findViewById(R.id.input_login);
+        login.setText(PreferenceHelper.getValue(getContext(), PreferenceHelper.LOGIN));
         password = (EditText) v.findViewById(R.id.input_password);
         v.findViewById(R.id.loginButton).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,6 +103,11 @@ public class LoginFragment extends AbstractFragment {
         return v;
     }
 
+    /**
+     * On attach.
+     *
+     * @param context the context
+     */
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -95,12 +119,18 @@ public class LoginFragment extends AbstractFragment {
         }
     }
 
+    /**
+     * On detach.
+     */
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
     }
 
+    /**
+     * The type Login async task.
+     */
     public class LoginAsyncTask extends AsyncTask<String, Void, String> {
 
         Context context;
@@ -127,6 +157,7 @@ public class LoginFragment extends AbstractFragment {
                 if (!HTTPHelper.isInternetAvailable(context)) {
                     return "Internet not available";
                 }
+                PreferenceHelper.setValue(getContext(), PreferenceHelper.LOGIN, params[0]);
                 RestResponse r = twitterDAO.login(params[0], params[1]);
                 if (r.isError()) {
                     displayToast(new JSONObject(r.getBody()).getString("message"));
@@ -149,6 +180,7 @@ public class LoginFragment extends AbstractFragment {
         protected void onPostExecute(final String token) {
             hideProgressDialog();
             if (token != null) {
+                PreferenceHelper.setValue(getActivity(), PreferenceHelper.TOKEN, token);
                 Intent i = new Intent(context, LoggedActivity.class);
                 i.putExtra(Constants.INTENT_TOKEN, token);
                 startActivity(i);

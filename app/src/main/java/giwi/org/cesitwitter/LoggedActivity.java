@@ -1,46 +1,47 @@
 package giwi.org.cesitwitter;
 
-import android.content.Context;
-import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ListView;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import giwi.org.cesitwitter.adapter.MessagesAdapter;
-import giwi.org.cesitwitter.helper.HTTPHelper;
-import giwi.org.cesitwitter.helper.RestResponse;
-import giwi.org.cesitwitter.helper.TwitterDAO;
-import giwi.org.cesitwitter.model.Message;
+import giwi.org.cesitwitter.fragments.AbstractFragment;
+import giwi.org.cesitwitter.fragments.MessageListFragment;
+import giwi.org.cesitwitter.fragments.ProfileFragment;
+import giwi.org.cesitwitter.helper.PreferenceHelper;
 
 /**
  * The type Messages activity.
  */
 public class LoggedActivity extends AbstractActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
-    ListView listView;
-    MessagesAdapter adapter;
-    TwitterDAO twitterDAO = new TwitterDAO();
-    String token;
-    SwipeRefreshLayout swipeRefreshLayout;
+        implements NavigationView.OnNavigationItemSelectedListener, AbstractFragment.OnFragmentInteractionListener {
+    private Fragment fragment;
+    private String token;
+
+    @Override
+    public void onFragmentInteraction(String uri) {
+        if (fragment != null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .remove(fragment).commit();
+        }
+        if ("messages".equals(uri)) {
+            fragment = MessageListFragment.newInstance();
+        } else if ("profile".equals(uri)) {
+            fragment = ProfileFragment.newInstance();
+        }
+        if (fragment != null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment, fragment)
+                    .commit();
+        }
+    }
 
     /**
      * On create.
@@ -50,32 +51,13 @@ public class LoggedActivity extends AbstractActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_messages);
+        setContentView(R.layout.activity_logged);
         token = getIntent().getStringExtra(Constants.INTENT_TOKEN);
-        listView = (ListView) findViewById(R.id.listView);
-        adapter = new MessagesAdapter(this);
-
-        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                refresh();
-            }
-        });
-        swipeRefreshLayout.setColorSchemeColors(R.color.colorAccent, R.color.colorPrimary, R.color.colorPrimaryDark);
-
+        fragment = getSupportFragmentManager().findFragmentById(R.id.fragment);
+        PreferenceHelper.setValue(this, PreferenceHelper.TOKEN, token);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
+        if (toolbar != null)
+            setSupportActionBar(toolbar);
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -84,13 +66,8 @@ public class LoggedActivity extends AbstractActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        listView.setAdapter(adapter);
-        refresh();
     }
 
-    private void refresh() {
-        new MessageAsyncTask(this).execute(token);
-    }
 
     /**
      * On back pressed.
@@ -152,9 +129,9 @@ public class LoggedActivity extends AbstractActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_messages) {
-            Intent i = new Intent(this, LoggedActivity.class);
-            i.putExtra(Constants.INTENT_TOKEN, token);
-            startActivity(i);
+            onFragmentInteraction("messages");
+        } else if (id == R.id.nav_profile) {
+            onFragmentInteraction("profile");
         } else if (id == R.id.nav_logout) {
 
         }
@@ -164,75 +141,5 @@ public class LoggedActivity extends AbstractActivity
         return true;
     }
 
-    /**
-     * The type Login async task.
-     */
-    public class MessageAsyncTask extends AsyncTask<String, Void, JSONArray> {
 
-        Context context;
-
-        /**
-         * Instantiates a new Login async task.
-         *
-         * @param context the context
-         */
-        public MessageAsyncTask(final Context context) {
-            this.context = context;
-        }
-
-        /**
-         * Do in background string.
-         *
-         * @param params the params
-         * @return the JSONArray
-         */
-        @Override
-        protected JSONArray doInBackground(String... params) {
-            try {
-
-                if (!HTTPHelper.isInternetAvailable(context)) {
-                    return new JSONArray();
-                }
-                RestResponse r = twitterDAO.getMessages(params[0]);
-                if (r.isError()) {
-                    displayToast(new JSONObject(r.getBody()).getString("message"));
-                    return null;
-                }
-
-                return new JSONArray(r.getBody());
-            } catch (JSONException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        /**
-         * On post execute.
-         *
-         * @param res the res
-         */
-        @Override
-        protected void onPostExecute(final JSONArray res) {
-            hideProgressDialog();
-            List<Message> msgs = new ArrayList<>();
-            if (res != null) {
-                for (int i = 0; i < res.length(); i++) {
-                    try {
-                        JSONObject m = res.getJSONObject(i);
-                        msgs.add(new Message(m.getJSONObject("user").getString("username"),
-                                m.getString("message"),
-                                m.getString("date"),
-                                m.getJSONObject("user").optString("urlPhoto")));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-                Collections.reverse(msgs);
-                adapter.addMessage(msgs);
-                if(swipeRefreshLayout.isRefreshing()) {
-                    swipeRefreshLayout.setRefreshing(false);
-                }
-            }
-        }
-    }
 }

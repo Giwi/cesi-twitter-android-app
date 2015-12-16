@@ -36,13 +36,11 @@ public class MainActivity extends AbstractActivity implements AbstractFragment.O
             fragment = LoginFragment.newInstance();
         } else if ("signup".equals(uri)) {
             fragment = SignupFragment.newInstance();
-        }
-        if (fragment != null) {
+        } if (fragment != null) {
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.fragment, fragment)
                     .commit();
         }
     }
-
 }

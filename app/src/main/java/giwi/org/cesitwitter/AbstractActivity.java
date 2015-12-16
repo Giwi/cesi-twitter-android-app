@@ -14,7 +14,7 @@ public class AbstractActivity extends AppCompatActivity {
     /**
      * Method to close progress dialog.
      */
-    void hideProgressDialog() {
+    public void hideProgressDialog() {
         if (progressDialog != null && progressDialog.isShowing()) {
             progressDialog.dismiss();
         }
@@ -25,7 +25,7 @@ public class AbstractActivity extends AppCompatActivity {
      *
      * @param body the body
      */
-    void displayToast(final String body) {
+    public void displayToast(final String body) {
         runOnUiThread(new Runnable() {
             public void run() {
                 Snackbar.make(findViewById(R.id.layout), body, Snackbar.LENGTH_LONG).show();
@@ -37,10 +37,12 @@ public class AbstractActivity extends AppCompatActivity {
     /**
      * Display progress dialog.
      */
-    void displayProgressDialog() {
+    public void displayProgressDialog() {
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("Loading ...");
-        progressDialog.setMessage("hello in progress ...");
+        progressDialog.setMessage("In progress ...");
         progressDialog.show();
     }
+
+
 }
